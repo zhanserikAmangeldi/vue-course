@@ -23,7 +23,7 @@ const categories = computed(() => {
 })
 
 // computed vars
-const incompletedTasksCount = computed(() => {
+const incompleteTasksCount = computed(() => {
   return tasks.value.filter((task) => !task.done).length
 })
 
@@ -78,7 +78,7 @@ function removeTask(id) {
     </select>
     <button>Add the task</button>
   </form>
-  <span>Completed task counts: {{ incompletedTasksCount }}</span>
+  <span>Completed task counts: {{ incompleteTasksCount }}</span>
   <div>
     <label>Filter by category:</label>
     <select v-model="selectedCategory">
@@ -88,7 +88,7 @@ function removeTask(id) {
       <option>All</option>
       <option>Low</option>
       <option>Medium</option>
-      <option>Heigh</option>
+      <option>High</option>
     </select>
   </div>
   <ul v-if="filteredTasks.length != 0">
