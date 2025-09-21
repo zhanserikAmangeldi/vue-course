@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 
 let id = 0
 
+// reactive vars
 const newTask = ref('')
 const hideCompleted = ref(false)
 const tasks = ref([
@@ -11,12 +12,19 @@ const tasks = ref([
   { id: id++, desc: "Third Task", done: false }
 ])
 
-const completedTasks = computed(() => {
+
+// computed vars
+const incompletedTasksCount = computed(() => {
+  return tasks.value.filter((task) => !task.done).length
+})
+
+const filteredTasks = computed(() => {
   return hideCompleted.value
     ? tasks.value.filter((task) => !task.done)
     : tasks.value
 })
 
+// functions
 function addTask() {
   tasks.value.push({
     id: id++,
@@ -39,13 +47,15 @@ function removeTask(id) {
     <input type="text" v-model="newTask" required placeholder="New Task">
     <button>Add the task</button>
   </form>
-  <ul>
-    <li v-for="task in completedTasks" :key="task.id">
+  <span>Completed task counts: {{ incompletedTasksCount }}</span>
+  <ul v-if="filteredTasks.length != 0">
+    <li v-for="task in filteredTasks" :key="task.id">
       <input type="checkbox" v-model="task.done">
       <span :class="{ done: task.done}">{{ task.desc }}</span>
       <button @click="removeTask(task.id)">x</button>
     </li>
   </ul>
+  <p v-else>There are not tasks :[</p>
   <button @click="hideCompleted = !hideCompleted">
     {{ hideCompleted ? 'Show all' : 'Hide completed'}}
   </button>
