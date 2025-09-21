@@ -8,6 +8,7 @@ const newTask = ref('')
 const newCategory = ref('')
 const newPriority = ref('Low')
 const selectedCategory = ref('All')
+const selectedPriority = ref('All')
 const hideCompleted = ref(false)
 const tasks = ref([
   { id: id++, desc: "First Task", done: true, priority: "High", category: "General" },
@@ -31,6 +32,10 @@ const filteredTasks = computed(() => {
 
   if (hideCompleted.value) {
     list = list.filter((task) => !task.done)
+  }
+
+  if (selectedPriority.value !== 'All') {
+    list = list.filter((task) => task.priority === selectedPriority.value)
   }
 
   if (selectedCategory.value !== 'All') {
@@ -78,6 +83,12 @@ function removeTask(id) {
     <label>Filter by category:</label>
     <select v-model="selectedCategory">
       <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+    </select>
+    <select v-model="selectedPriority">
+      <option>All</option>
+      <option>Low</option>
+      <option>Medium</option>
+      <option>Heigh</option>
     </select>
   </div>
   <ul v-if="filteredTasks.length != 0">
