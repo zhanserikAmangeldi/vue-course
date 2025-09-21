@@ -4,15 +4,16 @@ import { ref } from 'vue'
 let id = 0
 const newTask = ref('')
 const tasks = ref([
-  { id: id++, desc: "First Task"},
-  { id: id++, desc: "Second Task"},
-  { id: id++, desc: "Third Task"}
+  { id: id++, desc: "First Task", done: true },
+  { id: id++, desc: "Second Task", done: false },
+  { id: id++, desc: "Third Task", done: false }
 ])
 
 function addTask() {
   tasks.value.push({
     id: id++,
-    desc: newTask.value
+    desc: newTask.value,
+    done: false
   })
   newTask.value = ''
 }
@@ -32,11 +33,15 @@ function removeTask(id) {
   </form>
   <ul>
     <li v-for="task in tasks" :key="task.id">
-      {{ task.desc }}
+      <input type="checkbox" v-model="task.done">
+      <span :class="{ done: task.done}">{{ task.desc }}</span>
       <button @click="removeTask(task.id)">x</button>
     </li>
   </ul>
-
 </template>
 
-<style scoped></style>
+<style scoped>
+.done {
+  text-decoration: line-through;
+}
+</style>
