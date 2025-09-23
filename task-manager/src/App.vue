@@ -1,12 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue'
+import TaskForm from './components/TaskForm.vue'
+import TaskList from './components/TaskList.vue'
 
 let id = 0
 
 // reactive vars
-const newTask = ref('')
-const newCategory = ref('')
-const newPriority = ref('Low')
 const selectedCategory = ref('All')
 const selectedPriority = ref('All')
 const hideCompleted = ref(false)
@@ -45,42 +44,34 @@ const filteredTasks = computed(() => {
 })
 
 // functions
-function addTask() {
+function addTask(taskData) {
   tasks.value.push({
     id: id++,
-    desc: newTask.value,
-    done: false,
-    priority: newPriority.value,
-    category: newCategory.value
+    ...taskData,
+    done: false
   })
-  newTask.value = ''
-  newPriority.value = 'Low'
-  newCategory.value = ''
 }
 
-function removeTask(id) {
+function removeTask(taskId) {
   tasks.value = tasks.value.filter((task) => {
-    return task.id != id
+    return task.id != taskId
   })
 }
 
+function updateTask(taskId, updates) {
+  const taskIndex = tasks.value.findIndex(task => task.id === taskId)
+  if (taskIndex !== -1) {
+    tasks.value[taskIndex] = { ...tasks.value[taskIndex], ...updates }
+  }
+}
 </script>
 
 <template>
   <div class="app">
     <h1>Task Manager by Zhanserik</h1>
 
-    <!-- Form -->
-    <form class="task-form" @submit.prevent="addTask">
-      <input type="text" v-model="newTask" required placeholder="New Task" />
-      <input type="text" v-model="newCategory" required placeholder="Task's category" />
-      <select v-model="newPriority">
-        <option>High</option>
-        <option>Medium</option>
-        <option>Low</option>
-      </select>
-      <button class="btn-add">Add</button>
-    </form>
+    <!-- Task Form Component -->
+    <TaskForm @add-task="addTask" />
 
     <!-- Counter -->
     <span class="counter">Tasks remaining: {{ incompleteTasksCount }}</span>
@@ -106,21 +97,12 @@ function removeTask(id) {
       </button>
     </div>
 
-    <!-- List -->
-    <ul v-if="filteredTasks.length != 0" class="task-list">
-      <li v-for="task in filteredTasks" :key="task.id" class="task-item">
-        <input type="checkbox" v-model="task.done" />
-        <span :class="{ done: task.done }" class="task-content">
-          {{ task.desc }}
-        </span>
-        <span class="task-meta">
-          <span class="category">{{ task.category }}</span>
-          <span class="priority" :class="task.priority.toLowerCase()">{{ task.priority }}</span>
-        </span>
-        <button @click="removeTask(task.id)" class="btn-remove">×</button>
-      </li>
-    </ul>
-    <p v-else class="no-tasks">There are no tasks :[</p>
+    <!-- Task List Component -->
+    <TaskList 
+      :tasks="filteredTasks" 
+      @remove-task="removeTask"
+      @update-task="updateTask"
+    />
   </div>
 </template>
 
@@ -142,45 +124,6 @@ h1 {
   color: #2c3e50;
   font-weight: 300;
   font-size: 2em;
-}
-
-.task-form {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 25px;
-  flex-wrap: wrap;
-}
-
-.task-form input,
-.task-form select {
-  padding: 12px 16px;
-  border: 2px solid #e1e8ed;
-  border-radius: 8px;
-  font-size: 14px;
-  flex: 1;
-  min-width: 120px;
-  transition: border-color 0.2s ease;
-}
-
-.task-form input:focus,
-.task-form select:focus {
-  outline: none;
-  border-color: #3498db;
-}
-
-.btn-add {
-  padding: 12px 20px;
-  background: #27ae60;
-  color: white;
-  border: none;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.btn-add:hover {
-  background: #219a52;
 }
 
 .counter {
@@ -211,113 +154,6 @@ h1 {
   border-radius: 6px;
   background: white;
   cursor: pointer;
-}
-
-.task-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 25px 0;
-}
-
-.task-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 8px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.task-item:hover {
-  background: #f1f3f4;
-  transform: translateY(-1px);
-}
-
-.task-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
-.task-content {
-  flex: 1;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-.task-meta {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.category {
-  background: #e9ecef;
-  color: #495057;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.priority {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.priority.high {
-  background: #fee;
-  color: #dc2626;
-}
-
-.priority.medium {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.priority.low {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.btn-remove {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
-}
-
-.btn-remove:hover {
-  background: #c0392b;
-}
-
-.done {
-  text-decoration: line-through;
-  color: #888;
-}
-
-.no-tasks {
-  text-align: center;
-  color: #666;
-  font-style: italic;
-  padding: 40px 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  margin-bottom: 25px;
 }
 
 .toggle-btn {
